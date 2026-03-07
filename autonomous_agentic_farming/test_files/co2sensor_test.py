@@ -5,43 +5,51 @@ Library: scd30-i2c  (pip3 install scd30-i2c)
 This library is designed for direct Raspberry Pi GPIO I2C — no dongle needed.
 """
 
-import time
 import csv
 import os
+import time
 from datetime import datetime
+
 from scd30_i2c import SCD30
 
 # ── Config ────────────────────────────────────────────────────────────────────
-MEASUREMENT_INTERVAL_S = 2       # Valid range: 2–1800 seconds
-WARMUP_S               = 10      # Stabilisation delay before first read
-LOG_TO_CSV             = True
-LOG_FILE               = "scd30_log.csv"
-CO2_WARN_PPM           = 1000
-CO2_ALERT_PPM          = 2000
+MEASUREMENT_INTERVAL_S = 2  # Valid range: 2 to 1800 seconds
+WARMUP_S = 10  # Stabilisation delay before first read
+LOG_TO_CSV = True
+LOG_FILE = "scd30_log.csv"
+CO2_WARN_PPM = 1000
+CO2_ALERT_PPM = 2000
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def classify_co2(ppm: float) -> str:
     if ppm < 600:
         return "✅ Excellent"
-    elif ppm < 1000:
+    if ppm < 1000:
         return "🟡 Good"
-    elif ppm < 2000:
+    if ppm < 2000:
         return "🟠 Poor — Increase ventilation"
-    else:
-        return "🔴 Hazardous — Ventilate immediately"
+    return "🔴 Hazardous — Ventilate immediately"
+
 
 def init_csv(path: str):
-    if not os.path.exists(path):
-        with open(path, "w", newline="") as f:
+    if not os.path.exists(path):  # noqa: PTH110
+        with open(path, "w", newline="") as f:  # noqa: PTH123
             csv.writer(f).writerow(["timestamp", "co2_ppm", "temperature_c", "humidity_rh"])
         print(f"[LOG] Created: {path}")
 
+
 def append_csv(path: str, co2: float, temp: float, hum: float):
-    with open(path, "a", newline="") as f:
-        csv.writer(f).writerow([
-            datetime.now().isoformat(),
-            f"{co2:.0f}", f"{temp:.2f}", f"{hum:.2f}"
-        ])
+    with open(path, "a", newline="") as f:  # noqa: PTH123
+        csv.writer(f).writerow(
+            [
+                datetime.now().isoformat(),  # noqa: DTZ005
+                f"{co2:.0f}",
+                f"{temp:.2f}",
+                f"{hum:.2f}",
+            ],
+        )
+
 
 def forced_recalibration(scd30: SCD30, reference_ppm: int = 400):
     """Run in fresh outdoor air (~400 ppm). Uncomment call in main() to use."""
@@ -49,6 +57,7 @@ def forced_recalibration(scd30: SCD30, reference_ppm: int = 400):
     time.sleep(120)
     scd30.forced_recalibration_with_reference(reference_ppm)
     print(f"[CAL] Done — reference set to {reference_ppm} ppm")
+
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
@@ -77,7 +86,7 @@ def main():
 
                 if measurement is not None:
                     co2, temperature, humidity = measurement
-                    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # noqa: DTZ005
 
                     print(f"[{ts}]")
                     print(f"  CO2         : {co2:.0f} ppm  — {classify_co2(co2)}")
@@ -104,8 +113,6 @@ def main():
         scd30.stop_periodic_measurement()
         print("[INFO] Sensor stopped.")
 
+
 if __name__ == "__main__":
     main()
-
-
-

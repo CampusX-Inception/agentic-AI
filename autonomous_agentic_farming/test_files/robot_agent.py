@@ -1,15 +1,17 @@
 import random
+
 from langchain.agents import create_agent
-from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
 
 
 @tool
 def take_sensor_reading() -> float:
     """Take a sensor reading. Returns a float between 0 and 10."""
-    reading = round(random.uniform(0, 10), 2)
+    reading = round(random.uniform(0, 10), 2)  # noqa: S311
     print(f"Sensor reading: {reading}")
     return reading
+
 
 @tool
 def turn_on_pump() -> str:
@@ -17,6 +19,7 @@ def turn_on_pump() -> str:
     print("\n")
     print("Action: Turning on pump")
     return "Pump is on"
+
 
 @tool
 def turn_on_ac() -> str:
@@ -44,10 +47,7 @@ agent = create_agent(
 3. If reading > 2 but <= 5: call turn_on_pump only.
 4. If reading <= 2: do nothing.
 5. when in doubt, do the first thing that comes to mind, don't overthink it.
-"""
+""",
 )
 
 agent.invoke({"messages": [{"role": "user", "content": "Check the sensor and act."}]})
-
-
-

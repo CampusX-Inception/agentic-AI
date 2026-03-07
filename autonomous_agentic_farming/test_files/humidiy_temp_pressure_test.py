@@ -6,58 +6,69 @@ I2C Address: 0x76 (detected via i2cdetect)
 Chip ID 0x60 = BME280 (includes humidity — better than BMP280)
 """
 
-import time
 import csv
 import os
+import time
 from datetime import datetime
 
-import board
 import adafruit_bme280.basic as adafruit_bme280  # ✅ Changed from adafruit_bmp280
+import board
 
 # ── Config ────────────────────────────────────────────────────────────────────
-I2C_ADDRESS        = 0x76    # Confirmed from i2cdetect
-SEA_LEVEL_PRESSURE = 1013.25 # hPa — adjust for local sea level
-POLL_INTERVAL_S    = 2
-LOG_TO_CSV         = True
-LOG_FILE           = "bme280_log.csv"
+I2C_ADDRESS = 0x76  # Confirmed from i2cdetect
+SEA_LEVEL_PRESSURE = 1013.25  # hPa — adjust for local sea level
+POLL_INTERVAL_S = 2
+LOG_TO_CSV = True
+LOG_FILE = "bme280_log.csv"
 
-TEMP_WARN_HIGH     = 35.0    # °C
-PRESSURE_WARN_LOW  = 980.0   # hPa
+TEMP_WARN_HIGH = 35.0  # °C
+PRESSURE_WARN_LOW = 980.0  # hPa
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def classify_pressure(hpa: float) -> str:
     if hpa >= 1013:
         return "🔵 High pressure (fair weather)"
-    elif hpa >= 990:
+    if hpa >= 990:
         return "🟡 Normal"
-    else:
-        return "🟠 Low pressure (possible rain)"
+    return "🟠 Low pressure (possible rain)"
+
 
 def classify_humidity(rh: float) -> str:
     if rh < 30:
         return "🟠 Dry"
-    elif rh < 60:
+    if rh < 60:
         return "✅ Comfortable"
-    else:
-        return "🟡 Humid"
+    return "🟡 Humid"
+
 
 def init_csv(path: str):
-    if not os.path.exists(path):
-        with open(path, "w", newline="") as f:
-            csv.writer(f).writerow([
-                "timestamp", "temperature_c", "humidity_rh",
-                "pressure_hpa", "altitude_m"
-            ])
+    if not os.path.exists(path):  # noqa: PTH110
+        with open(path, "w", newline="") as f:  # noqa: PTH123
+            csv.writer(f).writerow(
+                [
+                    "timestamp",
+                    "temperature_c",
+                    "humidity_rh",
+                    "pressure_hpa",
+                    "altitude_m",
+                ],
+            )
         print(f"[LOG] Created: {path}")
 
-def append_csv(path: str, temp: float, humidity: float,
-               pressure: float, altitude: float):
-    with open(path, "a", newline="") as f:
-        csv.writer(f).writerow([
-            datetime.now().isoformat(),
-            f"{temp:.2f}", f"{humidity:.2f}",
-            f"{pressure:.2f}", f"{altitude:.2f}"
-        ])
+
+def append_csv(path: str, temp: float, humidity: float, pressure: float, altitude: float):
+    with open(path, "a", newline="") as f:  # noqa: PTH123
+        csv.writer(f).writerow(
+            [
+                datetime.now().isoformat(),  # noqa: DTZ005
+                f"{temp:.2f}",
+                f"{humidity:.2f}",
+                f"{pressure:.2f}",
+                f"{altitude:.2f}",
+            ],
+        )
+
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
@@ -68,7 +79,7 @@ def main():
     if LOG_TO_CSV:
         init_csv(LOG_FILE)
 
-    i2c   = board.I2C()
+    i2c = board.I2C()
     bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c, address=I2C_ADDRESS)  # ✅ Changed
     bme280.sea_level_pressure = SEA_LEVEL_PRESSURE
 
@@ -78,11 +89,11 @@ def main():
 
     try:
         while True:
-            temperature = bme280.temperature   # °C
-            humidity    = bme280.humidity      # % RH  ✅ New — BME280 only
-            pressure    = bme280.pressure      # hPa
-            altitude    = bme280.altitude      # metres
-            ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            temperature = bme280.temperature  # °C
+            humidity = bme280.humidity  # % RH  ✅ New — BME280 only
+            pressure = bme280.pressure  # hPa
+            altitude = bme280.altitude  # metres
+            ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # noqa: DTZ005
 
             print(f"[{ts}]")
             print(f"  Temperature : {temperature:.2f} °C")
@@ -104,8 +115,6 @@ def main():
     except KeyboardInterrupt:
         print("\n[INFO] Stopped.")
 
+
 if __name__ == "__main__":
     main()
-
-
- 
