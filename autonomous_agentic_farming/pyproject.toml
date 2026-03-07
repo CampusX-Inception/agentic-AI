@@ -1,0 +1,15 @@
+[tool.ruff]
+target-version = "py313"
+extend-exclude = [
+    "*/migrations/*.py",
+    "staticfiles/*",
+]
+line-length = 250
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "C90", "I", "N", "UP", "YTT", "ASYNC", "S", "BLE", "FBT", "B", "A", "COM", "C4", "DTZ", "T10", "EM", "EXE", "FA", "ISC", "ICN", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "PERF", "RUF"]
+ignore = ["S101", "PT009", "RUF012", "SIM102", "UP038", "ISC001", "TRY003", "G004", "PLR2004", "FBT001", "B007", "FBT002", "ERA001", "EXE001","T201","INP001"]
+extend-unsafe-fixes = ["UP038"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
